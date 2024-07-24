@@ -1,0 +1,231 @@
+from models import Processor
+import streamlit as st
+import PIL.Image
+import pandas as pd
+import re
+import base64
+import time
+
+
+def page1_content():
+    processor = Processor()
+
+    st.set_page_config(
+        page_title="Stream Grapher",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
+
+    st.markdown("<h1 style='text-align: center; font-size: 3.5em;'>Stream <span ;'>Grapher</span></h1>", unsafe_allow_html=True)
+
+   
+
+    uploaded_file = st.file_uploader("**Upload your CSV data:**", type=["csv"])
+
+    if uploaded_file is not None:
+        # Read the CSV file
+        df = pd.read_csv(uploaded_file)
+        column_names = df.columns.tolist()
+        
+        # Convert column names list to a string
+        column_names_str = ', '.join(column_names)
+    else:
+        pass
+
+    # prompt ="""
+    # The user will upload their CSV file to you. We retrieve the column names in the file.
+    # Your task is to suggest a visualization technique that can be applied to the columns . The suggested chart should not be randomly chosen; analyze the column names properly and suggest the techniques accordingly.
+    # It's not mandatory to cover all the columns for the techniques. If the data in a column is not suitable, simply exclude it from any graph suggestions.
+    # Suggest visualization techniques from the following options:
+    # Line Chart
+    # Bar Chart
+    # Pie Chart
+    # Scatter Plot
+    # Histogram
+    # Heatmap
+    # Box Plot
+    # Contour3D Plot
+    # 3D Surface Plot
+    # 3D Scatter Plot
+    # Ensure that the suggestions are relevant to the data and can provide meaningful insights based on the nature of each column.
+    # Sample Template for the Output:
+
+    # 1. **Pie Chart**
+    # -Reason for the chart:  
+    # -Columns Required:
+    # -Purpose: 
+
+    # 2. **Map**
+    # -Reason for the chart: 
+    # -Columns Required:
+    # -Purpose: 
+
+    # 3. **Line Chart**
+    # -Reason for the chart:
+    # -Columns Required: 
+    # -Purpose: 
+
+    # 4. **Scatter Plot (with Location)**
+    # -Reason for the chart: 
+    # -Columns Required:
+    # -Purpose: 
+
+    # 5. **Combination Visualization**
+    # -Reason for the chart: 
+    # -Columns Required:
+    # -Purpose: 
+    # """
+
+    prompt ="""
+    Role: Data Visualization Advisor
+
+    Context: You are an expert data analyst specializing in data visualization. Your task is to analyze CSV file contents and recommend appropriate visualization techniques based on the column names provided.
+
+    Input: The user will provide column names from a CSV file.
+
+    Instructions:
+    1. Carefully analyze the provided column names.
+    2. Suggest 3-5 visualization techniques that are most appropriate for the given data.
+    3. Choose from the following visualization options:
+    - Line Chart
+    - Bar Chart
+    - Pie Chart
+    - Scatter Plot
+    - Histogram
+    - Heatmap
+    - Box Plot
+    - Contour3D Plot
+    - 3D Surface Plot
+    - 3D Scatter Plot
+    4. Ensure your suggestions are relevant and provide meaningful insights based on the nature of each column.
+    5. It's not necessary to use all columns in your suggestions. Exclude any columns that are not suitable for visualization.
+    6. For each suggested visualization, provide:
+    - The name of the chart
+    - A clear reason for choosing this chart type
+    - The specific columns required for the visualization
+    - The purpose or insights that can be gained from this visualization
+
+    Output Expected:
+    Provide your recommendations using the following template for each suggested visualization:
+
+    1. **[Chart Type]**
+    - Reason: [Explain why this chart is suitable for the data]
+    - Columns Required: [List the specific columns to be used]
+    - Purpose: [Describe the insights or information this visualization will provide]
+
+    2. **[Chart Type]**
+    - Reason: [Explain why this chart is suitable for the data]
+    - Columns Required: [List the specific columns to be used]
+    - Purpose: [Describe the insights or information this visualization will provide]
+
+    [Repeat for each suggested visualization, up to 5 total]
+
+    Additional Notes:
+    - If you need clarification on any column names, please ask the user for more information.
+    - If you identify potential combinations of visualizations that could provide deeper insights, include these as a "Combination Visualization" suggestion.
+    """
+    
+    with st.sidebar:
+        #  st.markdown("<h2>Stream Grapher is a user-friendly web application for data visualization from CSV files. You can upload your data on the first page, where our model suggests tailored chart ideas based on column names.</h2>", unsafe_allow_html=True)
+        st.markdown("**<span style='font-size:larger; font-weight:bold;'>Stream Grapher</span> is a user-friendly web application designed to streamline data visualization from CSV files. Upon uploading their data on the initial page, users are greeted with tailored chart suggestions generated by our model, leveraging column names for personalized recommendations.**", unsafe_allow_html=True)
+
+        # st.markdown("**Stream Grapher is a user-friendly web application designed to streamline data visualization from CSV files. Upon uploading their data on the initial page, users are greeted with tailored chart suggestions generated by our model, leveraging column names for personalized recommendations.**")
+        st.sidebar.header("Chart Generation Flow")
+        st.sidebar.markdown(
+        """
+        ```plaintext
+        +-------------------+
+        | Upload CSV        |
+        +---------+---------+
+                |
+                v
+        +-------------------+
+        | Click 'Suggest    |
+        | Chart'            |
+        +---------+---------+
+                |
+                v
+        +-------------------+
+        | View Model        |
+        | Suggestions       |
+        +---------+---------+
+                |
+                v
+        +-------------------+
+        | Download Suggestions|
+        +---------+---------+
+                |
+                v
+        +-------------------+
+        | Click 'Visualizer'|
+        | Customize and     |
+        | Generate Charts   |
+        +---------+---------+
+                |
+                v
+        +-------------------+
+        | Charts Generated  |
+        +-------------------+
+        """
+        )
+    try:
+        if st.button("Suggest Chart"):
+            try:
+                with st.spinner("Generating suggestion..."):
+        
+        # Simulate processing time
+                
+                # Process input text based on selected tone
+                    redrafted_text = processor.ChartGenerator(prompt, column_names_str)
+                    
+                    # Display the redrafted text
+                    # st.markdown(f"<div class='content'>{redrafted_text}</div>", unsafe_allow_html=True)
+                    # Split the text based on the numbering pattern
+                    # Display the formatted text
+                    # st.markdown(redrafted_text)
+                    st.markdown( 
+                        """
+                        <style>
+                                .container {
+                                    border: 1px solid #ffffff;
+                                    padding: 15px;
+                                    border-radius: 10px;
+                                    margin-top: 20px;
+                                    margin-bottom: 20px;
+                                    white-space: normal;
+                                }
+                                
+                                .container-header {
+                                    color: #ffffff;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                    margin-bottom: 10px;
+                                    background-color: grey;
+                                    padding: 5px;
+                                    border-radius: 5px;
+                                    text-align: center;
+                                }
+                        </style>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown(f"<div class='container-header center-text'>{'Suggestions'}</div>", unsafe_allow_html=True)
+                   
+                    st.markdown(redrafted_text)
+                    st.session_state.show_go_to_page2_button = True
+                    file_path = "suggestion.txt"
+                    with open(file_path, "w") as file:
+                        file.write(redrafted_text)
+
+                    # Encode data to base64
+                    encoded_data = base64.b64encode(redrafted_text.encode()).decode()
+                    href = f'<a href="data:file/txt;base64,{encoded_data}" download="{file_path}">Download Response</a>'
+                    st.markdown(href, unsafe_allow_html=True)
+            except Exception as e:
+                # Display error message if an exception occurs
+                if(column_names_str ==""):
+                    st.warning("no file")
+                st.error("An error occurred: " + str(e))
+
+    except:
+        st.warning("CSV file has not been uploaded. Please select a CSV file to proceed.")
